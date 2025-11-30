@@ -174,7 +174,7 @@ for col in colors_obj:
 marillo = cfg["marillo_hex"]
 morao = cfg["morao_hex"]
 
-cWhite, cBlack = chromatize_endpoints(colors_obj)
+cWhite, cBlack = chromatize_endpoints(colors_obj, marillo, morao)
 
 width = cfg["width"]
 height = cfg["height"]

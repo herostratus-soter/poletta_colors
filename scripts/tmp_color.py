@@ -208,7 +208,7 @@ for elemento in range(start, stop, 1):
     
     plot_paleta(
         colores = colores_rgb,
-        directorio = "/home/acid-factory-usr/Imágenes/tmp_palette/",
+        directorio = "img/",
         prefijo = f"tmp_equipos{desviacion_global}_",
         cols = 4,
         indice = elemento+1
