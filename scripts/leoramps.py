@@ -20,15 +20,8 @@ cfg = {
     # Chroma (Saturación)
     "cf_white": -0.8,
     "cf_black": 0.6,
-    
-    # matices
-    "marillo_hex": "#ffee00",
-    "morao_hex": "#7700ff",
-    
-    #dimensión ploteo
-    "width": 32,
-    "height": 256
 }
+
 
 #-----------------------------------------------------------función para encontrar centroide a partir de una lista de colores
 
@@ -104,14 +97,15 @@ def chromatize_endpoints(colors_obj, marillo, morao):
     
     return cWhite, cBlack
   
-def plot(gradient_data, name):
+def plot(gradient_data, directorio):
     plt.axis('off')
     plt.imshow(gradient_data)
-    plt.savefig(name, bbox_inches='tight', pad_inches=0)
+    plt.savefig(directorio, bbox_inches='tight', pad_inches=0)
     plt.plot()
     
-def gradient_ok(polette, mode, cWhite, cBlack):
-  
+def gradient_ok(polette, height, width, mode, cWhite, cBlack):
+    
+    segments = len(polette)
     gradient_data = np.zeros((height, width * segments, 3))
     
     for g in range(0, segments):
@@ -135,68 +129,6 @@ def gradient_ok(polette, mode, cWhite, cBlack):
             gradient_data[i + halve, g * width : (g+1) * width, :] = colour.notation.HEX_to_RGB(str(hereColor))
         
     return gradient_data
-    
-#----------------------------------------------------------------@title Definicion de colores inicial
-#Definir colores primarios y secundarios
-
-colors_hex = np.array([
-    "#ff624f",
-    "#be83fa",
-    "#00c8d0",
-    "#81c916",
-    "#be83fa",
-    "#00c8d0",
-    "#81c916"
-])
-
-colors_obj = []
-
-for col in colors_hex:
-  colors_obj.append(colors.HEX(col))
-
-#now do the interpolations (mantener saturacion para que no salga tan desaturado?)
-inter_col = []
-mode = "shortest"
-#mode = "use_OKLAB"
-
-for color in range(len(colors_obj)): # ---- añade a la lista todas las interpolaciones de colores intermedios (no se va a usar)
-    color2 = (color+1)%len(colors_obj)
-    inter_col.append(tools.interpolate(0.5, colors_obj[color], colors_obj[color2], mode) )
-
-#now fuse
-palette = []
-for col in colors_obj:
-    palette.append(col)
-#for col in inter_col:
-#palette.append(col.to_HEX())
-
-#tonos
-marillo = cfg["marillo_hex"]
-morao = cfg["morao_hex"]
-
-cWhite, cBlack = chromatize_endpoints(colors_obj, marillo, morao)
-
-width = cfg["width"]
-height = cfg["height"]
-polette = palette
-segments = len(polette)
-
-mode_oklab = "use_OKLAB"
-mode_oklch = "shortest"
-
-name_oklab = '01_oklab.png'
-name_oklch = '02_oklch.png'
-
-gradient_oklab = gradient_ok(palette, mode_oklab, cWhite, cBlack)
-gradient_oklch = gradient_ok(palette, mode_oklch, cWhite, cBlack)
-
-plot(gradient_oklab, name_oklab)
-plot(gradient_oklch, name_oklch)
-
-comparative_gradient = np.concatenate((gradient_oklab, gradient_oklch), axis=1)
-
-plot(comparative_gradient, "03_tmp")
-
 
 
 

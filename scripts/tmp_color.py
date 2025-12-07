@@ -1,10 +1,21 @@
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import colorsys
+import colour
 import numpy as np
 import math
 from scipy.interpolate import interp1d
 from okhsl import okhsl_to_srgb, srgb_to_okhsl
+from leoramps import chromatize_endpoints, gradient_ok, plot
+
+import sys
+import os
+
+libPath = "python-oklch/src"
+if libPath not in sys.path:
+    sys.path.insert(0, libPath)
+
+from oklch import colors, tools
 
 
 #---------------------------------------------------------------------------------------
@@ -106,30 +117,76 @@ def plot_paleta(colores, directorio, prefijo, cols, indice):
     )
     
     plt.close()#plotea la paleta, nada mas
+    
   
-
+def ok_leoramp(colors_rgb, directorio, prefijo, indice):
+    
+    
+    colors_hex = [
+        mcolors.to_hex(color_data) 
+        for color_data in colors_rgb
+    ]
+    
+    palette = []
+    
+    for col in colors_hex:
+      palette.append(colors.HEX(col))
+    
+    #now do the interpolations (mantener saturacion para que no salga tan desaturado?)
+    
+    
+    #tonos
+    marillo = cfg["marillo_hex"]
+    morao = cfg["morao_hex"]
+    width = cfg["width"]
+    height = cfg["height"]
+    
+    name_oklab = '_oklab.png'
+    name_oklch = '_oklch.png'
+    name_comp = '_comparacion.png'
+    
+    cWhite, cBlack = chromatize_endpoints(palette, marillo, morao)
+    
+    gradient_oklab = gradient_ok(palette, height, width, "use_OKLAB", cWhite, cBlack)
+    gradient_oklch = gradient_ok(palette, height, width, "shortest", cWhite, cBlack)
+    
+    plot(gradient_oklab, f"{directorio}{prefijo}{indice:03d}{name_oklab}")
+    plot(gradient_oklch, f"{directorio}{prefijo}{indice:03d}{name_oklch}")
+    
+    comparative_gradient = np.concatenate((gradient_oklab, gradient_oklch), axis=1)
+    
+    #plot(comparative_gradient, f"{directorio}{prefijo}{indice:03d}{name_comp}")
 
 #----------------------------paleta------------------------
-
+cfg = {
+    # matices
+    "marillo_hex": "#ffee00",
+    "morao_hex": "#7700ff",
+    
+    #dimensión ploteo
+    "width": 32,
+    "height": 256
+}
 
 start = 0
-stop = 1 #12 
-rango = 1 #20
+stop = 12 #12 
+rango = 20 #20
 
 
 for elemento in range(start, stop, 1):
   
+    
     colores_okhsl = []
-    h_division_equipo = 8
     desviacion_global = 85
     
-   
+    h_division_equipo = 5
+    """
     colores_okhsl = paleta_okhsl(
         lista_colores = colores_okhsl,
         division = h_division_equipo,
-        s_list = [90,90,90,90,90,90,90,90],
+        s_list = [90,90,90,90],
         l = 67,
-        h_list = [1,2,3,4,5,6,7,8],
+        h_list = [1,2,3,4],
         desviacion = desviacion_global
     )
     
@@ -146,7 +203,7 @@ for elemento in range(start, stop, 1):
     h_map = [16,16,2,2]
     s_map = [40,65,65,40]
 
-
+    """
     colores_okhsl = paleta_okhsl(
         lista_colores = colores_okhsl,
         division = h_division_maps,
@@ -164,6 +221,7 @@ for elemento in range(start, stop, 1):
         h_list = h_map,
         desviacion = desviacion
     )
+    """
     
     colores_okhsl = paleta_okhsl(
         lista_colores = colores_okhsl,
@@ -173,7 +231,7 @@ for elemento in range(start, stop, 1):
         h_list = h_map,
         desviacion = desviacion
     )
-    
+    """
     colores_okhsl = paleta_okhsl(
         lista_colores = colores_okhsl,
         division = h_division_maps,
@@ -182,8 +240,8 @@ for elemento in range(start, stop, 1):
         h_list = h_map,
         desviacion = desviacion
     )
+    """
     
-
     colores_okhsl = paleta_okhsl(
         lista_colores = colores_okhsl,
         division = h_division_maps,
@@ -192,6 +250,8 @@ for elemento in range(start, stop, 1):
         h_list = [compl,compl],
         desviacion = desviacion
     )
+    
+    """
     
     colores_okhsl = paleta_okhsl(
         lista_colores = colores_okhsl,
@@ -203,18 +263,26 @@ for elemento in range(start, stop, 1):
     )
     
     """
+
     
     colores_rgb = lista_okhsl_to_rgb(colores_okhsl)
     
+    directorio = "img/"
+    
+    ok_leoramp(
+        colores_rgb, 
+        directorio, 
+        prefijo = f"tmp_equipos{desviacion_global}_",
+        indice = elemento+1
+        )
+        
     plot_paleta(
         colores = colores_rgb,
-        directorio = "img/",
+        directorio = directorio,
         prefijo = f"tmp_equipos{desviacion_global}_",
         cols = 4,
         indice = elemento+1
         )
-
-
 
 
 
